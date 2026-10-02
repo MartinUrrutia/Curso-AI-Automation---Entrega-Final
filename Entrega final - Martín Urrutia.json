@@ -1,0 +1,2579 @@
+{
+  "name": "Entrega final - Martín Urrrutia",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "Label_4054667130129356833"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        304,
+        -16
+      ],
+      "id": "5955eaa7-84a3-450c-b08a-18d30311204b",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rhl2ZORLWvtPogSw",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2dde8829-2da9-4705-8a8a-9e4233519d5f",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c5118e9e-770e-4040-814b-88ac4a16e6d2",
+              "leftValue": "={{ ($json.text || '').length }}",
+              "rightValue": 20,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "6d3b0609-b095-475a-844d-5445b7f7b706",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "/(USD|\\$)\\s?\\d+/i",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        -16
+      ],
+      "id": "fc9246f2-e315-4eab-98af-8e46893547a2",
+      "name": "IF — Validación de datos mínimos"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appFZYPpvgTsuK8aK",
+          "mode": "list",
+          "cachedResultName": "Costos_Naviera",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblH8iw4UXFw1T4lU",
+          "mode": "list",
+          "cachedResultName": "Incidencias_Costos",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK/tblH8iw4UXFw1T4lU"
+        },
+        "filterByFormula": "={ID_Hilo_Gmail} = '{{ $node[\"Gmail Trigger\"].json[\"threadId\"] }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        -144
+      ],
+      "id": "5cb4155f-f148-47bd-8b87-8d17abd49dde",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "Bc6SUp61KnGJvEtf",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cd80255e-a71c-4eea-8838-58d243408d95",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        -144
+      ],
+      "id": "d4d50d35-642a-46ce-a7d8-d0f77a31527e",
+      "name": "IF — ¿Ya existe?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -256
+      ],
+      "id": "cb2d8b3c-bb1b-4fa1-8dde-355e986c1ff8",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appFZYPpvgTsuK8aK",
+          "mode": "list",
+          "cachedResultName": "Costos_Naviera",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblH8iw4UXFw1T4lU",
+          "mode": "list",
+          "cachedResultName": "Incidencias_Costos",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK/tblH8iw4UXFw1T4lU"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Estado": "Pendiente",
+            "Fecha de Recepción": "={{$now}}",
+            "Email de Origen": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+            "Descripción Original del Correo": "={{ $('Gmail Trigger').item.json.text }}",
+            "ID_Hilo_Gmail": "={{ $('Gmail Trigger').item.json.threadId }}",
+            "Cliente": "={{ $('IF — Validación de datos mínimos').item.json.from.value[0].name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID de Incidencia",
+              "displayName": "ID de Incidencia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha de Recepción",
+              "displayName": "Fecha de Recepción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tipo de Cargo",
+              "displayName": "Tipo de Cargo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Demurrage",
+                  "value": "Demurrage"
+                },
+                {
+                  "name": "Detention",
+                  "value": "Detention"
+                },
+                {
+                  "name": "Storage",
+                  "value": "Storage"
+                },
+                {
+                  "name": "Otro",
+                  "value": "Otro"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monto USD",
+              "displayName": "Monto USD",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Descripción Original del Correo",
+              "displayName": "Descripción Original del Correo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen Generado por IA",
+              "displayName": "Resumen Generado por IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Baja",
+                  "value": "Baja"
+                },
+                {
+                  "name": "Media",
+                  "value": "Media"
+                },
+                {
+                  "name": "Alta",
+                  "value": "Alta"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado por IA",
+                  "value": "Procesado por IA"
+                },
+                {
+                  "name": "Aprobado por Humano",
+                  "value": "Aprobado por Humano"
+                },
+                {
+                  "name": "Cancelado",
+                  "value": "Cancelado"
+                },
+                {
+                  "name": "Enviado",
+                  "value": "Enviado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email de Origen",
+              "displayName": "Email de Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID_Hilo_Gmail",
+              "displayName": "ID_Hilo_Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Modelo de IA Usado",
+              "displayName": "Modelo de IA Usado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Archivos Adjuntos",
+              "displayName": "Archivos Adjuntos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notas de Validación Humana",
+              "displayName": "Notas de Validación Humana",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Historial de Cambios de Estado",
+              "displayName": "Historial de Cambios de Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Log_Errores",
+              "displayName": "Log_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "From field: ID Hilo Gmail",
+              "displayName": "From field: ID Hilo Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        -64
+      ],
+      "id": "4e5e7bee-798d-4e95-b816-f40055fdc5c1",
+      "name": "Create a record",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "Bc6SUp61KnGJvEtf",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres un asistente especializado en clasificar incidencias de sobrecostos\noperativos para una naviera. Analiza el siguiente correo y extrae la\ninformación en el formato JSON solicitado.\n\nReglas de clasificación para \"tipo_cargo\":\n- Demurrage, Detention, Storage, u Otro (si no calza con las anteriores).\n\nReglas de clasificación para \"prioridad\":\n- Alta: monto mayor a USD 500, o el texto menciona urgencia/plazos vencidos.\n- Media: monto entre USD 150 y 500.\n- Baja: monto menor a USD 150.\n\nResponde ÚNICAMENTE con el JSON solicitado, sin texto adicional. \n\n\"tipo_cargo\", \"monto_usd\", \"prioridad\", \"resumen\"\nDevuelve ÚNICAMENTE esos 4 campos. No agregues ningún campo adicional.\n\nCorreo a analizar:\n{{ $json.fields['Descripción Original del Correo'] }}\n\nCliente asociado: {{ $('Gmail Trigger').item.json.from.value[0].name }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1248,
+        -64
+      ],
+      "id": "ec062a9d-a1cf-4f79-88e4-b483f1775d2a",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "maxTokensToSample": 400,
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        176
+      ],
+      "id": "ca53befc-7fb2-464e-959e-0231394ffc01",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "84CjjSrBAdubRFz7",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "87bdb101-d1bc-4dfd-9b1d-638a6cea7548",
+              "leftValue": "={{ $json.output.monto_usd }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "17737cba-5625-484f-bc19-d3e9577ef31c",
+              "leftValue": "={{ $json.output.tipo_cargo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        -112
+      ],
+      "id": "73e6e93e-69b7-4906-982d-9ccfaeeafeb3",
+      "name": "IF — ¿Respuesta IA válida?"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appFZYPpvgTsuK8aK",
+          "mode": "list",
+          "cachedResultName": "Costos_Naviera",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl7Fa4IKvkJisCqS",
+          "mode": "list",
+          "cachedResultName": "Log_Errores",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK/tbl7Fa4IKvkJisCqS"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Resuelto": false,
+            "Fecha": "={{ $now }}",
+            "Nodo de Origen": "={{ $json.Nodo_Origen }}",
+            "Tipo de Error": "={{ $json.Tipo_Error }}",
+            "Payload Fallido": "={{ $json.Payload_Fallido }}",
+            "Incidencia Asociada": "={{ $json.Registro_Relacionado || '' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID de Error",
+              "displayName": "ID de Error",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Nodo de Origen",
+              "displayName": "Nodo de Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tipo de Error",
+              "displayName": "Tipo de Error",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Payload Fallido",
+              "displayName": "Payload Fallido",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Incidencia Asociada",
+              "displayName": "Incidencia Asociada",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resuelto",
+              "displayName": "Resuelto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles Técnicos",
+              "displayName": "Detalles Técnicos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Responsable de Solución",
+              "displayName": "Responsable de Solución",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2112,
+        192
+      ],
+      "id": "d72ccb47-cd1d-4560-bbc3-4eaebb2d0769",
+      "name": "[Rama Error] Airtable — Create en Log_Errores + Slack — Alerta a admin",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "Bc6SUp61KnGJvEtf",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appFZYPpvgTsuK8aK",
+          "mode": "list",
+          "cachedResultName": "Costos_Naviera",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblH8iw4UXFw1T4lU",
+          "mode": "list",
+          "cachedResultName": "Incidencias_Costos",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK/tblH8iw4UXFw1T4lU"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Create a record').item.json.id }}",
+            "Tipo de Cargo": "={{ $json.output.tipo_cargo }}",
+            "Monto USD": "={{ $json.output.monto_usd }}",
+            "Prioridad": "={{ $json.output.prioridad }}",
+            "Resumen Generado por IA": "={{ $json.output.resumen }}",
+            "Modelo de IA Usado": "openai/gpt-oss-120b",
+            "Estado": "Procesado por IA"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "ID de Incidencia",
+              "displayName": "ID de Incidencia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha de Recepción",
+              "displayName": "Fecha de Recepción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tipo de Cargo",
+              "displayName": "Tipo de Cargo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Demurrage",
+                  "value": "Demurrage"
+                },
+                {
+                  "name": "Detention",
+                  "value": "Detention"
+                },
+                {
+                  "name": "Storage",
+                  "value": "Storage"
+                },
+                {
+                  "name": "Otro",
+                  "value": "Otro"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monto USD",
+              "displayName": "Monto USD",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Descripción Original del Correo",
+              "displayName": "Descripción Original del Correo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen Generado por IA",
+              "displayName": "Resumen Generado por IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Baja",
+                  "value": "Baja"
+                },
+                {
+                  "name": "Media",
+                  "value": "Media"
+                },
+                {
+                  "name": "Alta",
+                  "value": "Alta"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado por IA",
+                  "value": "Procesado por IA"
+                },
+                {
+                  "name": "Aprobado por Humano",
+                  "value": "Aprobado por Humano"
+                },
+                {
+                  "name": "Cancelado",
+                  "value": "Cancelado"
+                },
+                {
+                  "name": "Enviado",
+                  "value": "Enviado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email de Origen",
+              "displayName": "Email de Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID_Hilo_Gmail",
+              "displayName": "ID_Hilo_Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Modelo de IA Usado",
+              "displayName": "Modelo de IA Usado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Archivos Adjuntos",
+              "displayName": "Archivos Adjuntos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notas de Validación Humana",
+              "displayName": "Notas de Validación Humana",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Historial de Cambios de Estado",
+              "displayName": "Historial de Cambios de Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Log_Errores",
+              "displayName": "Log_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "From field: ID Hilo Gmail",
+              "displayName": "From field: ID Hilo Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1776,
+        -128
+      ],
+      "id": "870a9047-cad3-4a9a-8f46-f7747cc48618",
+      "name": "Update record",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "Bc6SUp61KnGJvEtf",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7ed8fe72-b60c-40d5-a749-1c166187ef80",
+              "leftValue": "={{ $json.fields.Prioridad }}",
+              "rightValue": "Alta",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "d27beeb4-99eb-4637-8f1e-d10e097f52fe",
+              "leftValue": "={{ $json.fields['Monto USD'] }}",
+              "rightValue": 600,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1920,
+        -128
+      ],
+      "id": "b9bff176-513d-43cd-b307-671d4bad43d5",
+      "name": "IF — ¿Monto alto o Prioridad Alta?"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C5NMXST08",
+          "mode": "list",
+          "cachedResultName": "pendientes-de-aprobación"
+        },
+        "message": "=🔔 *Nueva incidencia requiere aprobación*\n\n*Cliente:* {{ $json.fields.Cliente }}\n*Tipo de cargo:* {{ $json.fields['Tipo de Cargo'] }}\n*Monto:* USD {{ $json.fields['Monto USD'] }}\n*Prioridad IA:* {{ $json.fields.Prioridad }}\n*Resumen:* {{ $json.fields['Resumen Generado por IA'] }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2112,
+        -32
+      ],
+      "id": "9df4d4e8-af45-4ff1-b281-7dcb1b17ca31",
+      "name": "Send message and wait for response",
+      "webhookId": "c271bd17-1b45-4ef2-a5ec-b61e1269c62a",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "RuVMuRjPY018LGWp",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e98cf8d8-0ea8-4add-968d-a1dcda49343f",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2304,
+        -32
+      ],
+      "id": "e8a246c6-8c90-4cc8-b75e-be44d709ae2e",
+      "name": "IF — ¿Aprobado?"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appFZYPpvgTsuK8aK",
+          "mode": "list",
+          "cachedResultName": "Costos_Naviera",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblH8iw4UXFw1T4lU",
+          "mode": "list",
+          "cachedResultName": "Incidencias_Costos",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK/tblH8iw4UXFw1T4lU"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Create a record').item.json.id }}",
+            "Estado": "Aprobado por Humano"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "ID de Incidencia",
+              "displayName": "ID de Incidencia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha de Recepción",
+              "displayName": "Fecha de Recepción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tipo de Cargo",
+              "displayName": "Tipo de Cargo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Demurrage",
+                  "value": "Demurrage"
+                },
+                {
+                  "name": "Detention",
+                  "value": "Detention"
+                },
+                {
+                  "name": "Storage",
+                  "value": "Storage"
+                },
+                {
+                  "name": "Otro",
+                  "value": "Otro"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monto USD",
+              "displayName": "Monto USD",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Descripción Original del Correo",
+              "displayName": "Descripción Original del Correo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen Generado por IA",
+              "displayName": "Resumen Generado por IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Baja",
+                  "value": "Baja"
+                },
+                {
+                  "name": "Media",
+                  "value": "Media"
+                },
+                {
+                  "name": "Alta",
+                  "value": "Alta"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado por IA",
+                  "value": "Procesado por IA"
+                },
+                {
+                  "name": "Aprobado por Humano",
+                  "value": "Aprobado por Humano"
+                },
+                {
+                  "name": "Cancelado",
+                  "value": "Cancelado"
+                },
+                {
+                  "name": "Enviado",
+                  "value": "Enviado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email de Origen",
+              "displayName": "Email de Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID_Hilo_Gmail",
+              "displayName": "ID_Hilo_Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Modelo de IA Usado",
+              "displayName": "Modelo de IA Usado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Archivos Adjuntos",
+              "displayName": "Archivos Adjuntos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notas de Validación Humana",
+              "displayName": "Notas de Validación Humana",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Historial de Cambios de Estado",
+              "displayName": "Historial de Cambios de Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Log_Errores",
+              "displayName": "Log_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "From field: ID Hilo Gmail",
+              "displayName": "From field: ID Hilo Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2496,
+        -208
+      ],
+      "id": "85a17412-c384-46c0-a753-46dad9547518",
+      "name": "Update record1",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "Bc6SUp61KnGJvEtf",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appFZYPpvgTsuK8aK",
+          "mode": "list",
+          "cachedResultName": "Costos_Naviera",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblH8iw4UXFw1T4lU",
+          "mode": "list",
+          "cachedResultName": "Incidencias_Costos",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK/tblH8iw4UXFw1T4lU"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Create a record').item.json.id }}",
+            "Estado": "Cancelado"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "ID de Incidencia",
+              "displayName": "ID de Incidencia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha de Recepción",
+              "displayName": "Fecha de Recepción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tipo de Cargo",
+              "displayName": "Tipo de Cargo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Demurrage",
+                  "value": "Demurrage"
+                },
+                {
+                  "name": "Detention",
+                  "value": "Detention"
+                },
+                {
+                  "name": "Storage",
+                  "value": "Storage"
+                },
+                {
+                  "name": "Otro",
+                  "value": "Otro"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monto USD",
+              "displayName": "Monto USD",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Descripción Original del Correo",
+              "displayName": "Descripción Original del Correo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen Generado por IA",
+              "displayName": "Resumen Generado por IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Baja",
+                  "value": "Baja"
+                },
+                {
+                  "name": "Media",
+                  "value": "Media"
+                },
+                {
+                  "name": "Alta",
+                  "value": "Alta"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado por IA",
+                  "value": "Procesado por IA"
+                },
+                {
+                  "name": "Aprobado por Humano",
+                  "value": "Aprobado por Humano"
+                },
+                {
+                  "name": "Cancelado",
+                  "value": "Cancelado"
+                },
+                {
+                  "name": "Enviado",
+                  "value": "Enviado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email de Origen",
+              "displayName": "Email de Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID_Hilo_Gmail",
+              "displayName": "ID_Hilo_Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Modelo de IA Usado",
+              "displayName": "Modelo de IA Usado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Archivos Adjuntos",
+              "displayName": "Archivos Adjuntos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notas de Validación Humana",
+              "displayName": "Notas de Validación Humana",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Historial de Cambios de Estado",
+              "displayName": "Historial de Cambios de Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Log_Errores",
+              "displayName": "Log_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "From field: ID Hilo Gmail",
+              "displayName": "From field: ID Hilo Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2496,
+        16
+      ],
+      "id": "6164a374-1ab6-4bae-90c8-069c5385a1e4",
+      "name": "Update record2",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "Bc6SUp61KnGJvEtf",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appFZYPpvgTsuK8aK",
+          "mode": "list",
+          "cachedResultName": "Costos_Naviera",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblH8iw4UXFw1T4lU",
+          "mode": "list",
+          "cachedResultName": "Incidencias_Costos",
+          "cachedResultUrl": "https://airtable.com/appFZYPpvgTsuK8aK/tblH8iw4UXFw1T4lU"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Create a record').item.json.id }}",
+            "Estado": "Enviado"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "ID de Incidencia",
+              "displayName": "ID de Incidencia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha de Recepción",
+              "displayName": "Fecha de Recepción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tipo de Cargo",
+              "displayName": "Tipo de Cargo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Demurrage",
+                  "value": "Demurrage"
+                },
+                {
+                  "name": "Detention",
+                  "value": "Detention"
+                },
+                {
+                  "name": "Storage",
+                  "value": "Storage"
+                },
+                {
+                  "name": "Otro",
+                  "value": "Otro"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monto USD",
+              "displayName": "Monto USD",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Descripción Original del Correo",
+              "displayName": "Descripción Original del Correo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen Generado por IA",
+              "displayName": "Resumen Generado por IA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Baja",
+                  "value": "Baja"
+                },
+                {
+                  "name": "Media",
+                  "value": "Media"
+                },
+                {
+                  "name": "Alta",
+                  "value": "Alta"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Procesado por IA",
+                  "value": "Procesado por IA"
+                },
+                {
+                  "name": "Aprobado por Humano",
+                  "value": "Aprobado por Humano"
+                },
+                {
+                  "name": "Cancelado",
+                  "value": "Cancelado"
+                },
+                {
+                  "name": "Enviado",
+                  "value": "Enviado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email de Origen",
+              "displayName": "Email de Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID_Hilo_Gmail",
+              "displayName": "ID_Hilo_Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Modelo de IA Usado",
+              "displayName": "Modelo de IA Usado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Archivos Adjuntos",
+              "displayName": "Archivos Adjuntos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notas de Validación Humana",
+              "displayName": "Notas de Validación Humana",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Historial de Cambios de Estado",
+              "displayName": "Historial de Cambios de Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Log_Errores",
+              "displayName": "Log_Errores",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "From field: ID Hilo Gmail",
+              "displayName": "From field: ID Hilo Gmail",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2816,
+        -208
+      ],
+      "id": "acf348eb-92ac-419f-842b-bdd989114231",
+      "name": "Update record3",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "Bc6SUp61KnGJvEtf",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        16
+      ],
+      "id": "0bf80439-71b1-4f71-bee7-29f20b44c19d",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C4U79R58S",
+          "mode": "list",
+          "cachedResultName": "alertas-sistema"
+        },
+        "text": "=⚠️ *Error en el flujo de sobrecostos*  \n\n*Origen:* {{ $json.fields[\"Nodo_Origen\"] }} \n*Tipo:* {{ $json.fields[\"Tipo_Error\"] }} \n*Fecha:* {{ $json.fields[\"Fecha\"] }}  \n\nRevisar en Airtable → tabla Log_Errores.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2320,
+        192
+      ],
+      "id": "248470f0-13dd-4eda-a78f-79607824e5e0",
+      "name": "Send a message2",
+      "webhookId": "94c1153b-638f-4e1c-af8d-142463a189d2",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "RuVMuRjPY018LGWp",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"tipo_cargo\": {\n      \"type\": \"string\",\n      \"enum\": [\"Demurrage\", \"Detention\", \"Storage\", \"Otro\"]\n    },\n    \"monto_usd\": { \"type\": \"number\" },\n    \"prioridad\": {\n      \"type\": \"string\",\n      \"enum\": [\"Alta\", \"Media\", \"Baja\"]\n    },\n    \"resumen\": { \"type\": \"string\" }\n  },\n  \"required\": [\"tipo_cargo\", \"monto_usd\", \"prioridad\", \"resumen\"],\n  \"additionalProperties\": false\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1440,
+        192
+      ],
+      "id": "3d830ba6-ea13-42d6-9f13-b7c698b20c86",
+      "name": "Structured Output Parser",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {
+          "maxTokensToSample": 400,
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        336
+      ],
+      "id": "4f5f7f3a-da6f-4a07-821e-a06b6bf6dac1",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "84CjjSrBAdubRFz7",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "=Estimados,  \n\nConfirmamos que el cargo reportado ha sido validado y aprobado:  \n\nTipo de cargo: {{ $json.fields['Tipo de Cargo'] }}\nMonto: USD {{ $json.fields['Monto USD'] }}\nDetalle: {{ $json.fields['Resumen Generado por IA'] }}\n\nEste cargo ha sido aprobado internamente y continuará con el proceso de facturación correspondiente.  \n\n\nSaludos, \nÁrea de Costos - Logística",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2656,
+        -208
+      ],
+      "id": "5a409777-7bbf-4fb9-8808-95bbdb5bf5a4",
+      "name": "Reply to a message",
+      "webhookId": "3a921ffb-0d1a-4e50-b692-4bcb16a2b4c8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rhl2ZORLWvtPogSw",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "=Estimados,  \n\nHemos revisado el cargo reportado y, tras validación interna, este no ha sido aprobado para facturación.  \n\nTipo de cargo: {{ $json.fields['Tipo de Cargo'] }}\nMonto informado: USD {{ $json.fields['Monto USD'] }}\n\nQuedamos atentos a cualquier antecedente adicional que permita reevaluar este cargo.  \n\n\nSaludos, \nÁrea de Costos - Logística",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2656,
+        16
+      ],
+      "id": "1029cde4-5ace-4355-ace5-f803fcbbaea4",
+      "name": "Reply to a message1",
+      "webhookId": "6923c591-64fb-4c1f-946f-ee014334fa2b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rhl2ZORLWvtPogSw",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d539cd27-8048-4c22-85dd-107bd01434f9",
+              "name": "Nodo_Origen",
+              "value": "IF — Validación de datos mínimos",
+              "type": "string"
+            },
+            {
+              "id": "037d515e-9237-49cc-afa5-c40aca501322",
+              "name": "Tipo_Error",
+              "value": "Datos insuficientes en el correo recibido",
+              "type": "string"
+            },
+            {
+              "id": "8ec2c4d7-dd85-47eb-b128-7f4895180251",
+              "name": "Payload_Fallido",
+              "value": "={{ JSON.stringify($json) }}",
+              "type": "string"
+            },
+            {
+              "id": "1193c8c8-5815-4779-8631-50ae6c303350",
+              "name": "Registro_Relacionado",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        688,
+        80
+      ],
+      "id": "430bd62c-36ba-4737-bf4e-23bc178c7d2f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0999e43d-0b74-4f91-8a46-7ca007629587",
+              "name": "Nodo_Origen",
+              "value": "AI Agent (falla técnica / API)",
+              "type": "string"
+            },
+            {
+              "id": "caf7fc3f-da32-4df4-b669-147af36c2c81",
+              "name": "Tipo_Error",
+              "value": "{{ $json.error }}",
+              "type": "string"
+            },
+            {
+              "id": "6c5367df-e5bf-4a7f-9a5b-acb6b36c68b4",
+              "name": "Payload_Fallido",
+              "value": "={{ JSON.stringify($json.output) }}",
+              "type": "string"
+            },
+            {
+              "id": "4090e9ce-9291-43b0-b03c-022d44ae343e",
+              "name": "Registro_Relacionado",
+              "value": "={{ $('Create a record').item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1648,
+        240
+      ],
+      "id": "301acc65-ca96-4e38-ac34-ec92dd87dee1",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0999e43d-0b74-4f91-8a46-7ca007629587",
+              "name": "Nodo_Origen",
+              "value": "AI Agent (contenido incompleto)",
+              "type": "string"
+            },
+            {
+              "id": "caf7fc3f-da32-4df4-b669-147af36c2c81",
+              "name": "Tipo_Error",
+              "value": "IA no devolvió monto o tipo de cargo",
+              "type": "string"
+            },
+            {
+              "id": "6c5367df-e5bf-4a7f-9a5b-acb6b36c68b4",
+              "name": "Payload_Fallido",
+              "value": "={{ JSON.stringify($json.output) }}",
+              "type": "string"
+            },
+            {
+              "id": "4090e9ce-9291-43b0-b03c-022d44ae343e",
+              "name": "Registro_Relacionado",
+              "value": "={{ $('Create a record').item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1792,
+        64
+      ],
+      "id": "f4af573c-100e-4098-ad8e-a15fde3e9a5e",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "IF — Validación de datos mínimos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — Validación de datos mínimos": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "IF — ¿Ya existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — ¿Ya existe?": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "IF — ¿Respuesta IA válida?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — ¿Respuesta IA válida?": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[Rama Error] Airtable — Create en Log_Errores + Slack — Alerta a admin": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "IF — ¿Monto alto o Prioridad Alta?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — ¿Monto alto o Prioridad Alta?": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "IF — ¿Aprobado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — ¿Aprobado?": {
+      "main": [
+        [
+          {
+            "node": "Update record1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update record2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record2": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record1": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Update record3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record3": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "[Rama Error] Airtable — Create en Log_Errores + Slack — Alerta a admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "[Rama Error] Airtable — Create en Log_Errores + Slack — Alerta a admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "[Rama Error] Airtable — Create en Log_Errores + Slack — Alerta a admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e7ba69c9-318a-4665-8a0d-92acfc0a4dd5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e48eb39856835a58163d66fe4c5ea55ccff43334e2af524c92798f2c5300d02f"
+  },
+  "nodeGroups": [],
+  "id": "8TPsRHypWP7frWmP",
+  "tags": []
+}
